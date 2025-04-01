@@ -66,7 +66,7 @@ const UserMenu: React.FC<UserMenuProps> = ({ user, onLogout }) => {
             className="w-8 h-8 rounded-full"
           />
         ) : (
-          <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center">
+          <div className="w-8 h-8 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center">
             {user.name.charAt(0).toUpperCase()}
           </div>
         )}
@@ -80,7 +80,7 @@ const UserMenu: React.FC<UserMenuProps> = ({ user, onLogout }) => {
           variants={buttonVariants}
           whileHover="hover"
           whileTap="tap"
-          className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors"
+          className="flex items-center gap-2 text-gray-600 hover:text-orange-500 transition-colors"
         >
           <motion.span variants={iconVariants}>
             <History size={20} />
@@ -94,7 +94,7 @@ const UserMenu: React.FC<UserMenuProps> = ({ user, onLogout }) => {
           variants={buttonVariants}
           whileHover="hover"
           whileTap="tap"
-          className="flex items-center gap-2 text-blue-600 hover:text-blue-800 transition-colors"
+          className="flex items-center gap-2 text-orange-500 hover:text-orange-600 transition-colors"
         >
           <motion.span variants={iconVariants}>
             <MessageSquare size={20} />
@@ -108,7 +108,7 @@ const UserMenu: React.FC<UserMenuProps> = ({ user, onLogout }) => {
         whileHover="hover"
         whileTap="tap"
         onClick={onLogout}
-        className="flex items-center gap-2 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors"
+        className="flex items-center gap-2 bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-colors"
       >
         <motion.span variants={iconVariants}>
           <LogOut size={20} />

@@ -121,7 +121,7 @@ function App() {
                 whileHover={{ rotate: 360 }}
                 transition={{ duration: 0.5 }}
               >
-                <Plane className="text-blue-600" size={24} />
+                <Plane className="text-orange-500" size={24} />
               </motion.div>
               <motion.span
                 initial={{ opacity: 0, x: -20 }}
@@ -242,7 +242,7 @@ function App() {
                         {destination.type}
                       </span>
                       <Link to={`/destination/${index + 1}`}>
-                        <button className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2">
+                        <button className="w-full bg-green-500 text-white py-2 rounded-lg hover:bg-green-600 transition-colors flex items-center justify-center gap-2">
                           View Details
                           <ArrowRight size={16} />
                         </button>
@@ -335,7 +335,7 @@ function App() {
                   placeholder="Enter your email"
                   className="bg-gray-800 text-white px-4 py-2 rounded-lg flex-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
-                <button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                <button className="bg-orange-500 text-white px-4 py-2 rounded-lg hover:bg-orange-600 transition-colors">
                   Subscribe
                 </button>
               </div>

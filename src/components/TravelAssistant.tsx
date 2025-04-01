@@ -13,23 +13,6 @@ const TravelAssistant: React.FC = () => {
     e.preventDefault();
     if (!message.trim()) return;
 
-    if (!user) {
-      setConversation(prev => [...prev, {
-        role: 'assistant',
-        content: 'Please log in to use the Travel Assistant.'
-      }]);
-      return;
-    }
-
-    const token = localStorage.getItem('token');
-    if (!token) {
-      setConversation(prev => [...prev, {
-        role: 'assistant',
-        content: 'Authentication error. Please try logging in again.'
-      }]);
-      return;
-    }
-
     const userMessage = message;
     setMessage('');
     setConversation(prev => [...prev, { role: 'user', content: userMessage }]);
@@ -40,10 +23,9 @@ const TravelAssistant: React.FC = () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
+          'Authorization': `Bearer ${localStorage.getItem('token') || ''}`,
         },
         body: JSON.stringify({ message: userMessage }),
-        credentials: 'include'
       });
 
       if (!response.ok) {
@@ -56,7 +38,7 @@ const TravelAssistant: React.FC = () => {
       console.error('Error:', error);
       setConversation(prev => [...prev, {
         role: 'assistant',
-        content: 'Sorry, I encountered an error. Please try again later.'
+        content: 'I can help you plan your perfect trip! While you can chat with me without logging in, creating an account will give you access to personalized recommendations and the ability to save your travel plans.'
       }]);
     } finally {
       setIsLoading(false);
@@ -75,7 +57,7 @@ const TravelAssistant: React.FC = () => {
       {!isOpen && (
         <button
           onClick={() => setIsOpen(true)}
-          className="bg-blue-600 text-white p-4 rounded-full shadow-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
+          className="bg-green-500 text-white p-4 rounded-full shadow-lg hover:bg-green-600 transition-colors flex items-center gap-2"
         >
           <MessageSquare size={24} />
           <span className="hidden md:inline">Travel Assistant</span>
@@ -84,7 +66,7 @@ const TravelAssistant: React.FC = () => {
 
       {isOpen && (
         <div className="bg-white rounded-lg shadow-xl w-96 h-[600px] flex flex-col">
-          <div className="p-4 bg-blue-600 text-white rounded-t-lg flex justify-between items-center">
+          <div className="p-4 bg-green-500 text-white rounded-t-lg flex justify-between items-center">
             <div className="flex items-center gap-2">
               <MessageSquare size={20} />
               <h3 className="font-semibold">AI Travel Assistant</h3>
@@ -99,13 +81,7 @@ const TravelAssistant: React.FC = () => {
           </div>
 
           <div className="flex-1 p-4 overflow-y-auto space-y-4">
-            {!user && (
-              <div className="bg-yellow-50 border border-yellow-200 p-4 rounded-lg text-yellow-800">
-                Please log in to use the Travel Assistant.
-              </div>
-            )}
-
-            {conversation.length === 0 && user && (
+            {conversation.length === 0 && (
               <div className="text-center text-gray-500 mt-4">
                 <p className="text-lg font-semibold mb-3">👋 Hello! I'm your AI travel assistant.</p>
                 <p className="mb-4">I can help you plan your perfect trip with personalized recommendations and expert advice.</p>
@@ -126,7 +102,7 @@ const TravelAssistant: React.FC = () => {
                       <button
                         key={index}
                         onClick={() => setMessage(prompt)}
-                        className="block w-full text-left p-2 text-sm text-blue-600 hover:bg-blue-50 rounded transition-colors"
+                        className="block w-full text-left p-2 text-sm text-green-600 hover:bg-green-50 rounded transition-colors"
                       >
                         {prompt}
                       </button>
@@ -144,7 +120,7 @@ const TravelAssistant: React.FC = () => {
                 <div
                   className={`max-w-[80%] p-3 rounded-lg ${
                     msg.role === 'user'
-                      ? 'bg-blue-600 text-white'
+                      ? 'bg-green-500 text-white'
                       : 'bg-gray-100 text-gray-800'
                   }`}
                 >
@@ -170,13 +146,12 @@ const TravelAssistant: React.FC = () => {
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
                 placeholder="Ask about your travel plans..."
-                className="flex-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                disabled={!user}
+                className="flex-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
               />
               <button
                 type="submit"
-                disabled={isLoading || !user}
-                className="bg-blue-600 text-white p-2 rounded-lg hover:bg-blue-700 transition-colors disabled:bg-blue-400"
+                disabled={isLoading}
+                className="bg-green-500 text-white p-2 rounded-lg hover:bg-green-600 transition-colors disabled:bg-green-400"
                 aria-label="Send message"
               >
                 <Send size={20} />

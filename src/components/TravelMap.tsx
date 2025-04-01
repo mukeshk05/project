@@ -26,12 +26,15 @@ const defaultCenter = {
   lng: 0,
 };
 
-const libraries: ("places" | "drawing" | "geometry" | "localContext" | "visualization")[] = ["places"];
+const libraries = ["places"] as const;
 
 const TravelMap: React.FC = () => {
+  const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+  
   const { isLoaded, loadError } = useLoadScript({
-    googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
+    googleMapsApiKey: apiKey || '',
     libraries,
+    version: "weekly"
   });
 
   const [selectedLocation, setSelectedLocation] = useState<Location | null>(null);
@@ -78,10 +81,18 @@ const TravelMap: React.FC = () => {
     }
   }, [map]);
 
+  if (!apiKey) {
+    return (
+      <div className="flex items-center justify-center h-96 bg-red-50 text-red-600">
+        Google Maps API key is missing. Please check your environment variables.
+      </div>
+    );
+  }
+
   if (loadError) {
     return (
       <div className="flex items-center justify-center h-96 bg-red-50 text-red-600">
-        Error loading maps. Please check your API key.
+        Error loading maps. Please check your API key and ensure the Maps JavaScript API is enabled.
       </div>
     );
   }

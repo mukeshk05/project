@@ -44,7 +44,7 @@ const AuthButtons: React.FC = () => {
             variants={buttonVariants}
             whileHover="hover"
             whileTap="tap"
-            className="flex items-center gap-2 text-gray-600 hover:text-blue-600 transition-colors px-4 py-2 rounded-lg hover:bg-blue-50"
+            className="flex items-center gap-2 text-gray-600 hover:text-orange-500 transition-colors px-4 py-2 rounded-lg hover:bg-orange-50"
           >
             <motion.span variants={iconVariants}>
               <LogIn size={20} />
@@ -65,7 +65,7 @@ const AuthButtons: React.FC = () => {
             variants={buttonVariants}
             whileHover="hover"
             whileTap="tap"
-            className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+            className="flex items-center gap-2 bg-orange-500 text-white px-4 py-2 rounded-lg hover:bg-orange-600 transition-colors"
           >
             <motion.span variants={iconVariants}>
               <UserPlus size={20} />

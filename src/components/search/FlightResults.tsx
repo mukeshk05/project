@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Plane, Clock, DollarSign, Users, ArrowRight } from 'lucide-react';
+import { Plane, Clock, DollarSign, Users, ArrowRight, Search } from 'lucide-react';
 
 interface Flight {
   id: string;
@@ -78,6 +78,16 @@ const FlightResults: React.FC = () => {
           <h1 className="text-3xl font-bold mb-2">Available Flights</h1>
           <p className="text-gray-600">Showing best matches for your search</p>
         </motion.div>
+
+        <motion.button
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+          onClick={() => handleSearch(activeSearch)}
+          className="w-full bg-green-500 text-white py-3 rounded-lg hover:bg-green-600 transition-colors flex items-center justify-center gap-2"
+        >
+          <Search size={20} />
+          Search Flights
+        </motion.button>
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           {/* Filters */}
@@ -198,7 +208,7 @@ const FlightResults: React.FC = () => {
                     </div>
                   </div>
                   
-                  <button className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2">
+                  <button className="bg-green-500 text-white px-6 py-2 rounded-lg hover:bg-green-600 transition-colors flex items-center gap-2">
                     Select
                     <ArrowRight size={16} />
                   </button>

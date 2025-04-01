@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Building, Star, MapPin, Wifi, Coffee, Dumbbell, School as Pool, ArrowRight } from 'lucide-react';
+import { Building, Star, MapPin, Wifi, Coffee, Dumbbell, School as Pool, ArrowRight, Search } from 'lucide-react';
 
 interface Hotel {
   id: string;
@@ -149,6 +149,16 @@ const HotelResults: React.FC = () => {
                   </div>
                 </div>
               </div>
+
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => handleSearch(activeSearch)}
+                className="w-full bg-green-500 text-white py-3 rounded-lg hover:bg-green-600 transition-colors flex items-center justify-center gap-2 mt-6"
+              >
+                <Search size={20} />
+                Search Hotels
+              </motion.button>
             </div>
           </motion.div>
 
@@ -241,7 +251,7 @@ const HotelResults: React.FC = () => {
                       <span className="text-sm text-gray-500">
                         {hotel.distance}
                       </span>
-                      <button className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2">
+                      <button className="bg-green-500 text-white px-6 py-2 rounded-lg hover:bg-green-600 transition-colors flex items-center gap-2">
                         View Rooms
                         <ArrowRight size={16} />
                       </button>

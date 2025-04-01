@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Ship, Calendar, Clock, MapPin, Anchor, Users, DollarSign, ArrowRight } from 'lucide-react';
+import { Ship, Calendar, Clock, MapPin, Anchor, Users, DollarSign, ArrowRight, Search } from 'lucide-react';
 
 interface Cruise {
   id: string;
@@ -167,6 +167,16 @@ const CruiseResults: React.FC = () => {
                   </div>
                 </div>
               </div>
+
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => handleSearch(activeSearch)}
+                className="w-full bg-green-500 text-white py-3 rounded-lg hover:bg-green-600 transition-colors flex items-center justify-center gap-2 mt-6"
+              >
+                <Search size={20} />
+                Search Cruises
+              </motion.button>
             </div>
           </motion.div>
 
@@ -255,7 +265,7 @@ const CruiseResults: React.FC = () => {
                           </span>
                         ))}
                       </div>
-                      <button className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2">
+                      <button className="bg-green-500 text-white px-6 py-2 rounded-lg hover:bg-green-600 transition-colors flex items-center gap-2">
                         View Details
                         <ArrowRight size={16} />
                       </button>

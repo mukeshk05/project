@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Car, Users, Fuel, Settings, DollarSign, ArrowRight } from 'lucide-react';
+import { Car, Users, Fuel, Settings, DollarSign, ArrowRight, Search } from 'lucide-react';
 
 interface CarOption {
   id: string;
@@ -146,6 +146,16 @@ const CarResults: React.FC = () => {
                   </div>
                 </div>
               </div>
+
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => handleSearch(activeSearch)}
+                className="w-full bg-green-500 text-white py-3 rounded-lg hover:bg-green-600 transition-colors flex items-center justify-center gap-2 mt-6"
+              >
+                <Search size={20} />
+                Search Cars
+              </motion.button>
             </div>
           </motion.div>
 
@@ -217,7 +227,7 @@ const CarResults: React.FC = () => {
                     </div>
 
                     <div className="flex justify-end">
-                      <button className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2">
+                      <button className="bg-green-500 text-white px-6 py-2 rounded-lg hover:bg-green-600 transition-colors flex items-center gap-2">
                         Select Car
                         <ArrowRight size={16} />
                       </button>

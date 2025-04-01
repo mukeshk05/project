@@ -10,7 +10,10 @@
     "outDir": "../dist/server",
     "rootDir": ".",
     "typeRoots": ["../node_modules/@types"],
-    "types": ["node", "express"]
+    "types": ["node", "express"],
+    "allowJs": true,
+    "checkJs": false,
+    "resolveJsonModule": true
   },
   "include": ["./**/*"],
   "exclude": ["node_modules"]

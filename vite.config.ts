@@ -24,6 +24,7 @@ export default defineConfig({
         target: 'http://localhost:5000',
         changeOrigin: true,
         secure: false,
+        rewrite: (path) => path.replace(/^\/api/, ''),
       }
     },
     port: 5173,
@@ -32,6 +33,6 @@ export default defineConfig({
   },
   envDir: '.',
   define: {
-    'import.meta.env.VITE_GOOGLE_MAPS_API_KEY': JSON.stringify(process.env.VITE_GOOGLE_MAPS_API_KEY),
+    'import.meta.env.VITE_GOOGLE_MAPS_API_KEY': JSON.stringify('AIzaSyCWlfo_kgJT0_FdgKZN-H0ejnp_k7CN7Zk'),
   },
 });

@@ -5,6 +5,7 @@ import dotenv from 'dotenv';
 import passport from 'passport';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { MongoMemoryServer } from 'mongodb-memory-server';
 import authRoutes from './routes/auth.js';
 import bookingRoutes from './routes/booking.js';
 import chatRoutes from './routes/chat.js';
@@ -14,6 +15,7 @@ import invoiceRoutes from './routes/invoices.js';
 import adminRoutes from './routes/admin.js';
 import travelRoutes from './routes/travel.js';
 import activityRoutes from './routes/activities.js';
+import User from './models/User.js';
 import './config/passport.js';
 
 dotenv.config();
@@ -49,20 +51,61 @@ app.get('/health', (req, res) => {
   res.json({ status: 'ok' });
 });
 
-// Convert PORT to number and provide default value
-const PORT = parseInt(process.env.PORT || '5000', 10);
+// MongoDB connection options
+const mongoOptions = {
+  serverSelectionTimeoutMS: 5000,
+  socketTimeoutMS: 45000,
+  family: 4
+};
 
-// Connect to MongoDB first, then start the server
-mongoose.connect(process.env.MONGODB_URI || '')
-  .then(() => {
+const createDefaultUser = async () => {
+  try {
+    // Check if default user exists
+    const existingUser = await User.findOne({ email: 'demo@example.com' });
+    if (!existingUser) {
+      // Create default user
+      const defaultUser = new User({
+        name: 'Demo User',
+        email: 'demo@example.com',
+        password: 'demo123', // This will be hashed by the User model pre-save hook
+        provider: 'local'
+      });
+      await defaultUser.save();
+      console.log('Default user created successfully');
+      console.log('Default login credentials:');
+      console.log('Email: demo@example.com');
+      console.log('Password: demo123');
+    }
+  } catch (error) {
+    console.error('Error creating default user:', error);
+  }
+};
+
+const startServer = async () => {
+  try {
+    let mongoUri = process.env.MONGODB_URI;
+
+    // If no MongoDB URI is provided, use in-memory MongoDB
+    if (!mongoUri) {
+      console.log('No MongoDB URI provided, using in-memory MongoDB...');
+      const mongod = await MongoMemoryServer.create();
+      mongoUri = mongod.getUri();
+    }
+
+    await mongoose.connect(mongoUri, mongoOptions);
     console.log('Connected to MongoDB');
+
+    // Create default user after database connection
+    await createDefaultUser();
+
+    const PORT = parseInt(process.env.PORT || '5000', 10);
     app.listen(PORT, '0.0.0.0', () => {
       console.log(`Server running on port ${PORT}`);
     });
-  })
-  .catch((err) => {
+  } catch (err) {
     console.error('MongoDB connection error:', err);
     process.exit(1);
-  });
+  }
+};
 
-export default app;
+startServer();
