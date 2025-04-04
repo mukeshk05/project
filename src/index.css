@@ -10,4 +10,31 @@
   .btn-secondary {
     @apply bg-green-500 hover:bg-green-600 text-white transition-colors;
   }
+
+  .glass-effect {
+    @apply backdrop-blur-lg bg-white/30 border border-white/20;
+  }
+
+  .glass-card {
+    @apply glass-effect shadow-xl hover:shadow-2xl transition-all duration-300;
+  }
+
+  .glass-nav {
+    @apply glass-effect shadow-md z-50 backdrop-blur-md bg-white/70;
+  }
+}
+
+.parallax-bg {
+  background-attachment: fixed;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+.gradient-text {
+  @apply bg-clip-text text-transparent bg-gradient-to-r from-orange-500 to-pink-500;
+}
+
+.hero-gradient {
+  background: linear-gradient(135deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.3) 100%);
 }

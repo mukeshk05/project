@@ -1,7 +1,8 @@
 import React, { useState, useMemo } from 'react';
 import { Routes, Route, Link, useNavigate } from 'react-router-dom';
 import { Plane, MapPin, Calendar, Users, Search, Star, ArrowRight, Phone, Mail, Clock, Filter, LogIn, UserPlus, LogOut, MessageSquare, History } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useInView } from 'react-intersection-observer';
 import { useAuth } from './context/AuthContext';
 import LoginForm from './components/LoginForm';
 import RegisterForm from './components/RegisterForm';
@@ -28,6 +29,16 @@ function App() {
   const [rating, setRating] = useState('all');
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+
+  const [heroRef, heroInView] = useInView({
+    triggerOnce: true,
+    threshold: 0.1,
+  });
+
+  const [featuresRef, featuresInView] = useInView({
+    triggerOnce: true,
+    threshold: 0.1,
+  });
 
   const handleLogout = () => {
     logout();
@@ -105,14 +116,51 @@ function App() {
     });
   }, [searchQuery, priceRange, rating]);
 
+  const navVariants = {
+    hidden: { y: -100, opacity: 0 },
+    visible: { 
+      y: 0, 
+      opacity: 1,
+      transition: {
+        type: "spring",
+        stiffness: 100,
+        damping: 20
+      }
+    }
+  };
+
+  const heroVariants = {
+    hidden: { opacity: 0, y: 50 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 0.8,
+        ease: "easeOut"
+      }
+    }
+  };
+
+  const cardVariants = {
+    hidden: { opacity: 0, y: 50 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 0.5,
+        ease: "easeOut"
+      }
+    }
+  };
+
   return (
     <div className="min-h-screen bg-white">
       {/* Navigation */}
       <motion.nav
-        initial={{ y: -100 }}
-        animate={{ y: 0 }}
-        transition={{ type: "spring", stiffness: 100 }}
-        className="bg-white shadow-md sticky top-0 z-50"
+        variants={navVariants}
+        initial="hidden"
+        animate="visible"
+        className="glass-nav sticky top-0"
       >
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex justify-between items-center h-16">
@@ -127,7 +175,7 @@ function App() {
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.2 }}
-                className="text-xl font-bold text-gray-900"
+                className="text-xl font-bold gradient-text"
               >
                 TravelBooking
               </motion.span>
@@ -148,29 +196,57 @@ function App() {
         <Route path="/" element={
           <>
             {/* Hero Section */}
-            <div className="relative h-[600px]">
-              <div className="absolute inset-0">
-                <img
-                  src="https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&q=80&w=2000"
-                  alt="Hero"
-                  className="w-full h-full object-cover"
-                />
-                <div className="absolute inset-0 bg-black bg-opacity-50"></div>
-              </div>
+            <motion.div
+              ref={heroRef}
+              variants={heroVariants}
+              initial="hidden"
+              animate={heroInView ? "visible" : "hidden"}
+              className="relative h-[600px] parallax-bg"
+              style={{
+                backgroundImage: `url('https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&q=80&w=2000')`
+              }}
+            >
+              <div className="absolute inset-0 hero-gradient"></div>
               
               <div className="relative max-w-7xl mx-auto px-4 h-full flex items-center">
                 <div className="text-white w-full">
-                  <h1 className="text-5xl font-bold mb-6">Discover Your Next Adventure</h1>
-                  <p className="text-xl mb-8 max-w-2xl">Experience the world's most breathtaking destinations with our premium travel packages and personalized itineraries.</p>
+                  <motion.h1
+                    initial={{ opacity: 0, y: 30 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.3, duration: 0.8 }}
+                    className="text-5xl font-bold mb-6"
+                  >
+                    Discover Your Next Adventure
+                  </motion.h1>
+                  <motion.p
+                    initial={{ opacity: 0, y: 30 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.5, duration: 0.8 }}
+                    className="text-xl mb-8 max-w-2xl"
+                  >
+                    Experience the world's most breathtaking destinations with our premium travel packages and personalized itineraries.
+                  </motion.p>
                   
-                  <TravelSearch />
+                  <motion.div
+                    initial={{ opacity: 0, y: 30 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.7, duration: 0.8 }}
+                  >
+                    <TravelSearch />
+                  </motion.div>
                 </div>
               </div>
-            </div>
+            </motion.div>
 
             {/* Search and Filter Section */}
             <div className="max-w-7xl mx-auto px-4 py-8">
-              <div className="bg-white rounded-lg shadow-md p-6 mb-8">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5 }}
+                className="glass-card p-6 mb-8"
+              >
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                   <div className="relative">
                     <Search className="absolute left-3 top-3 text-gray-400" size={20} />
@@ -211,75 +287,117 @@ function App() {
                     <span>{filteredDestinations.length} destinations found</span>
                   </div>
                 </div>
-              </div>
+              </motion.div>
             </div>
 
             {/* Map Section */}
             <div className="max-w-7xl mx-auto px-4 py-8">
-              <div className="bg-white rounded-lg shadow-md p-6 mb-8">
-                <h2 className="text-2xl font-bold mb-6">Explore Destinations & Packages</h2>
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5 }}
+                className="glass-card p-6 mb-8"
+              >
+                <h2 className="text-2xl font-bold mb-6 gradient-text">Explore Destinations & Packages</h2>
                 <TravelMap />
-              </div>
+              </motion.div>
             </div>
 
             {/* Destinations Grid */}
             <div className="max-w-7xl mx-auto px-4 py-8">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                {filteredDestinations.map((destination, index) => (
-                  <div key={index} className="bg-white rounded-lg shadow-lg overflow-hidden transform hover:scale-105 transition-transform">
-                    <img src={destination.image} alt={destination.name} className="w-full h-48 object-cover" />
-                    <div className="p-6">
-                      <div className="flex justify-between items-center mb-2">
-                        <h3 className="text-xl font-semibold">{destination.name}</h3>
-                        <span className="text-blue-600 font-bold">${destination.price}</span>
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="grid grid-cols-1 md:grid-cols-3 gap-8"
+              >
+                <AnimatePresence>
+                  {filteredDestinations.map((destination, index) => (
+                    <motion.div
+                      key={index}
+                      variants={cardVariants}
+                      initial="hidden"
+                      whileInView="visible"
+                      viewport={{ once: true }}
+                      whileHover={{ y: -10 }}
+                      className="glass-card overflow-hidden transform hover:scale-105 transition-all duration-300"
+                    >
+                      <img src={destination.image} alt={destination.name} className="w-full h-48 object-cover" />
+                      <div className="p-6">
+                        <div className="flex justify-between items-center mb-2">
+                          <h3 className="text-xl font-semibold">{destination.name}</h3>
+                          <span className="text-blue-600 font-bold">${destination.price}</span>
+                        </div>
+                        <p className="text-gray-600 mb-2">{destination.description}</p>
+                        <div className="flex items-center gap-1 mb-2">
+                          <Star className="text-yellow-400 fill-current" size={16} />
+                          <span className="text-gray-600">{destination.rating}</span>
+                        </div>
+                        <span className="inline-block bg-blue-100 text-blue-800 text-sm px-2 py-1 rounded-full mb-4">
+                          {destination.type}
+                        </span>
+                        <Link to={`/destination/${index + 1}`}>
+                          <motion.button
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            className="w-full bg-green-500 text-white py-2 rounded-lg hover:bg-green-600 transition-colors flex items-center justify-center gap-2"
+                          >
+                            View Details
+                            <ArrowRight size={16} />
+                          </motion.button>
+                        </Link>
                       </div>
-                      <p className="text-gray-600 mb-2">{destination.description}</p>
-                      <div className="flex items-center gap-1 mb-2">
-                        <Star className="text-yellow-400 fill-current" size={16} />
-                        <span className="text-gray-600">{destination.rating}</span>
-                      </div>
-                      <span className="inline-block bg-blue-100 text-blue-800 text-sm px-2 py-1 rounded-full mb-4">
-                        {destination.type}
-                      </span>
-                      <Link to={`/destination/${index + 1}`}>
-                        <button className="w-full bg-green-500 text-white py-2 rounded-lg hover:bg-green-600 transition-colors flex items-center justify-center gap-2">
-                          View Details
-                          <ArrowRight size={16} />
-                        </button>
-                      </Link>
-                    </div>
-                  </div>
-                ))}
-              </div>
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
+              </motion.div>
             </div>
 
             {/* Features */}
             <div className="bg-gray-50 py-16">
               <div className="max-w-7xl mx-auto px-4">
-                <h2 className="text-3xl font-bold mb-12 text-center">Why Choose Us</h2>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                  <div className="text-center">
-                    <div className="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <Phone className="text-blue-600" size={24} />
-                    </div>
-                    <h3 className="text-xl font-semibold mb-2">24/7 Support</h3>
-                    <p className="text-gray-600">Our dedicated team is always here to help you with any questions or concerns.</p>
-                  </div>
-                  <div className="text-center">
-                    <div className="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <Mail className="text-blue-600" size={24} />
-                    </div>
-                    <h3 className="text-xl font-semibold mb-2">Best Price Guarantee</h3>
-                    <p className="text-gray-600">We promise to offer you the best rate we can - at par with the best available anywhere else.</p>
-                  </div>
-                  <div className="text-center">
-                    <div className="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <Clock className="text-blue-600" size={24} />
-                    </div>
-                    <h3 className="text-xl font-semibold mb-2">Flexible Booking</h3>
-                    <p className="text-gray-600">Change your plans? No problem! We offer free cancellation on most bookings.</p>
-                  </div>
-                </div>
+                <motion.h2
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  className="text-3xl font-bold mb-12 text-center gradient-text"
+                >
+                  Why Choose Us
+                </motion.h2>
+                <motion.div
+                  ref={featuresRef}
+                  initial="hidden"
+                  animate={featuresInView ? "visible" : "hidden"}
+                  variants={{
+                    visible: {
+                      transition: {
+                        staggerChildren: 0.2
+                      }
+                    }
+                  }}
+                  className="grid grid-cols-1 md:grid-cols-3 gap-8"
+                >
+                  {[
+                    { icon: Phone, title: "24/7 Support", description: "Our dedicated team is always here to help you with any questions or concerns." },
+                    { icon: Mail, title: "Best Price Guarantee", description: "We promise to offer you the best rate we can - at par with the best available anywhere else." },
+                    { icon: Clock, title: "Flexible Booking", description: "Change your plans? No problem! We offer free cancellation on most bookings." }
+                  ].map((feature, index) => (
+                    <motion.div
+                      key={index}
+                      variants={cardVariants}
+                      className="glass-card p-6 text-center"
+                    >
+                      <motion.div
+                        whileHover={{ scale: 1.1 }}
+                        className="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4"
+                      >
+                        <feature.icon className="text-blue-600" size={24} />
+                      </motion.div>
+                      <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
+                      <p className="text-gray-600">{feature.description}</p>
+                    </motion.div>
+                  ))}
+                </motion.div>
               </div>
             </div>
           </>
