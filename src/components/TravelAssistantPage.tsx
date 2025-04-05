@@ -74,7 +74,7 @@ const TravelAssistantPage: React.FC = () => {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
         },
-        body: JSON.stringify({ message: userMessage }),
+        body: JSON.stringify({ message: userMessage,user:user }),
         credentials: 'include'
       });
 

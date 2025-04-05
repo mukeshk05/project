@@ -17,7 +17,9 @@ const openai = new OpenAI({
 router.post('/', async (req: Request, res: Response) => {
   try {
     const { message } = req.body;
-    const userId = (req.user as { userId: string })?.userId || 'anonymous';
+    console.log(req);
+    const userId = req.body.user._id;
+    console.log(req.body.user.email);
 
     if (!message) {
       return res.status(400).json({ message: 'Message is required' });
@@ -74,7 +76,7 @@ router.post('/', async (req: Request, res: Response) => {
           content: message
         }
       ],
-      model: "gpt-3.5-turbo",
+      model: "gpt-4",
       temperature: 0.7,
       max_tokens: 500,
     });
