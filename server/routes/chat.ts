@@ -76,7 +76,7 @@ router.post('/', async (req: Request, res: Response) => {
           content: message
         }
       ],
-      model: "gpt-4",
+      model: "gpt-4.5-preview-2025-02-27",
       temperature: 0.7,
       max_tokens: 500,
     });
