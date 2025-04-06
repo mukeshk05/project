@@ -19,6 +19,7 @@ import FlightResults from './components/search/FlightResults';
 import CarResults from './components/search/CarResults';
 import HotelResults from './components/search/HotelResults';
 import CruiseResults from './components/search/CruiseResults';
+import ChatHistory from './components/ChatHistory';
 
 function App() {
   const [destination, setDestination] = useState('');
@@ -412,6 +413,7 @@ function App() {
         <Route path="/search/cars" element={<CarResults />} />
         <Route path="/search/hotels" element={<HotelResults />} />
         <Route path="/search/cruises" element={<CruiseResults />} />
+        <Route path="/chat-history" element={<ChatHistory />} />
       </Routes>
 
       {/* Footer */}

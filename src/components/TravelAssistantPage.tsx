@@ -210,8 +210,8 @@ const TravelAssistantPage: React.FC = () => {
                 <div className="flex flex-wrap gap-1">
                   {metadata.locations.map((location, i) => (
                       <span key={i} className="bg-blue-100 text-blue-700 px-2 py-1 rounded-full text-xs">
-                    {location}
-                  </span>
+                  {location}
+                </span>
                   ))}
                 </div>
               </div>
@@ -222,8 +222,8 @@ const TravelAssistantPage: React.FC = () => {
                 <div className="flex flex-wrap gap-1">
                   {metadata.activities.map((activity, i) => (
                       <span key={i} className="bg-green-100 text-green-700 px-2 py-1 rounded-full text-xs">
-                    {activity}
-                  </span>
+                  {activity}
+                </span>
                   ))}
                 </div>
               </div>
@@ -234,8 +234,8 @@ const TravelAssistantPage: React.FC = () => {
                 <div className="flex flex-wrap gap-1">
                   {metadata.dates.map((date, i) => (
                       <span key={i} className="bg-purple-100 text-purple-700 px-2 py-1 rounded-full text-xs">
-                    {date}
-                  </span>
+                  {date}
+                </span>
                   ))}
                 </div>
               </div>
