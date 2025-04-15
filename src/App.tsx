@@ -22,6 +22,8 @@ import CruiseResults from './components/search/CruiseResults';
 import ChatHistory from './components/ChatHistory';
 import AssistantPage from './components/AssistantPage';
 
+
+
 function App() {
   const [destination, setDestination] = useState('');
   const [dates, setDates] = useState('');
@@ -31,6 +33,7 @@ function App() {
   const [rating, setRating] = useState('all');
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+
 
   const [heroRef, heroInView] = useInView({
     triggerOnce: true,

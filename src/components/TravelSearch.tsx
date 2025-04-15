@@ -3,19 +3,14 @@ import { motion } from 'framer-motion';
 import { Plane, Car, Building, Ship, Calendar, Users, MapPin, Search, Clock } from 'lucide-react';
 import DatePicker from 'react-datepicker';
 import { useNavigate } from 'react-router-dom';
-import PlacesAutocomplete from './PlacesAutocomplete';
 import "react-datepicker/dist/react-datepicker.css";
+import Autocomplete from "react-google-autocomplete";
+import { TextField,Input } from '@mui/material';
 
 type SearchType = 'flights' | 'cars' | 'hotels' | 'cruises';
 
-interface Location {
-  description: string;
-  placeId: string;
-  coordinates: {
-    lat: number;
-    lng: number;
-  };
-}
+
+
 
 const TravelSearch: React.FC = () => {
   const navigate = useNavigate();
@@ -23,9 +18,7 @@ const TravelSearch: React.FC = () => {
   const [searchParams, setSearchParams] = useState({
     flights: {
       from: '',
-      fromLocation: null as Location | null,
       to: '',
-      toLocation: null as Location | null,
       departDate: null as Date | null,
       returnDate: null as Date | null,
       passengers: 1,
@@ -33,14 +26,12 @@ const TravelSearch: React.FC = () => {
     },
     cars: {
       location: '',
-      pickupLocation: null as Location | null,
       pickupDate: null as Date | null,
       returnDate: null as Date | null,
       carType: 'any'
     },
     hotels: {
       location: '',
-      searchLocation: null as Location | null,
       checkIn: null as Date | null,
       checkOut: null as Date | null,
       guests: 1,
@@ -48,28 +39,29 @@ const TravelSearch: React.FC = () => {
     },
     cruises: {
       destination: '',
-      destinationLocation: null as Location | null,
       departurePort: '',
-      departureLocation: null as Location | null,
       departureDate: null as Date | null,
       duration: 'any'
     }
   });
+
+  const updateSearchParam = (updates) => {
+        setSearchParams(prevState => ({
+            ...prevState,
+            ...updates,
+        }));
+    };
 
   const handleSearch = (type: SearchType) => {
     const params = new URLSearchParams();
     
     switch (type) {
       case 'flights':
-        if (searchParams.flights.fromLocation) {
-          params.append('fromLat', searchParams.flights.fromLocation.coordinates.lat.toString());
-          params.append('fromLng', searchParams.flights.fromLocation.coordinates.lng.toString());
-          params.append('from', searchParams.flights.fromLocation.description);
+        if (searchParams.flights.from) {
+          params.append('from', searchParams.flights.from);
         }
-        if (searchParams.flights.toLocation) {
-          params.append('toLat', searchParams.flights.toLocation.coordinates.lat.toString());
-          params.append('toLng', searchParams.flights.toLocation.coordinates.lng.toString());
-          params.append('to', searchParams.flights.toLocation.description);
+        if (searchParams.flights.to) {
+          params.append('to', searchParams.flights.to);
         }
         if (searchParams.flights.departDate) params.append('departDate', searchParams.flights.departDate.toISOString());
         if (searchParams.flights.returnDate) params.append('returnDate', searchParams.flights.returnDate.toISOString());
@@ -79,10 +71,8 @@ const TravelSearch: React.FC = () => {
         break;
 
       case 'cars':
-        if (searchParams.cars.pickupLocation) {
-          params.append('lat', searchParams.cars.pickupLocation.coordinates.lat.toString());
-          params.append('lng', searchParams.cars.pickupLocation.coordinates.lng.toString());
-          params.append('location', searchParams.cars.pickupLocation.description);
+        if (searchParams.cars.location) {
+          params.append('location', searchParams.cars.location);
         }
         if (searchParams.cars.pickupDate) params.append('pickupDate', searchParams.cars.pickupDate.toISOString());
         if (searchParams.cars.returnDate) params.append('returnDate', searchParams.cars.returnDate.toISOString());
@@ -91,10 +81,8 @@ const TravelSearch: React.FC = () => {
         break;
 
       case 'hotels':
-        if (searchParams.hotels.searchLocation) {
-          params.append('lat', searchParams.hotels.searchLocation.coordinates.lat.toString());
-          params.append('lng', searchParams.hotels.searchLocation.coordinates.lng.toString());
-          params.append('location', searchParams.hotels.searchLocation.description);
+        if (searchParams.hotels.location) {
+          params.append('location', searchParams.hotels.location);
         }
         if (searchParams.hotels.checkIn) params.append('checkIn', searchParams.hotels.checkIn.toISOString());
         if (searchParams.hotels.checkOut) params.append('checkOut', searchParams.hotels.checkOut.toISOString());
@@ -104,15 +92,11 @@ const TravelSearch: React.FC = () => {
         break;
 
       case 'cruises':
-        if (searchParams.cruises.destinationLocation) {
-          params.append('destLat', searchParams.cruises.destinationLocation.coordinates.lat.toString());
-          params.append('destLng', searchParams.cruises.destinationLocation.coordinates.lng.toString());
-          params.append('destination', searchParams.cruises.destinationLocation.description);
+        if (searchParams.cruises.destination) {
+          params.append('destination', searchParams.cruises.destination);
         }
-        if (searchParams.cruises.departureLocation) {
-          params.append('portLat', searchParams.cruises.departureLocation.coordinates.lat.toString());
-          params.append('portLng', searchParams.cruises.departureLocation.coordinates.lng.toString());
-          params.append('departurePort', searchParams.cruises.departureLocation.description);
+        if (searchParams.cruises.departurePort) {
+          params.append('departurePort', searchParams.cruises.departurePort);
         }
         if (searchParams.cruises.departureDate) params.append('departureDate', searchParams.cruises.departureDate.toISOString());
         params.append('duration', searchParams.cruises.duration);
@@ -129,37 +113,59 @@ const TravelSearch: React.FC = () => {
   ];
 
   const renderSearchForm = () => {
+      const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
     switch (activeSearch) {
       case 'flights':
         return (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="col-span-1 md:col-span-3 grid grid-cols-1 md:grid-cols-2 gap-4">
-              <PlacesAutocomplete
-                placeholder="From"
-                type="airport"
-                initialValue={searchParams.flights.from}
-                onSelect={(location) => setSearchParams({
-                  ...searchParams,
-                  flights: {
-                    ...searchParams.flights,
-                    from: location.description,
-                    fromLocation: location
-                  }
-                })}
-              />
-              <PlacesAutocomplete
-                placeholder="To"
-                type="airport"
-                initialValue={searchParams.flights.to}
-                onSelect={(location) => setSearchParams({
-                  ...searchParams,
-                  flights: {
-                    ...searchParams.flights,
-                    to: location.description,
-                    toLocation: location
-                  }
-                })}
-              />
+                <div style={{ width: "250px" }}>
+                    <Input
+                        placeholder={"From Flights"}
+                        fullWidth
+                        color="secondary"
+                        inputComponent={({ inputRef, onFocus, onBlur, ...props }) => (
+                            <Autocomplete
+                                apiKey={apiKey}
+                                {...props}
+                                onPlaceSelected={(selected) =>  setSearchParams({
+                                    ...searchParams,
+                                    flights: {
+                                        ...searchParams.flights,
+                                        from: selected.name.toString()
+                                    }
+                                })
+                                }
+                                options={{
+                                    types: ['airport'], // Filter results by airports
+                                    fields: ['formatted_address', 'geometry', 'name'],
+                                }}
+                            />
+                        )}
+                    />
+
+                </div>
+
+                <div style={{ width: "250px" }}>
+                    <Input
+                        placeholder={"To Flights"}
+                        fullWidth
+                        color="secondary"
+                        inputComponent={({ inputRef, onFocus, onBlur, ...props }) => (
+                            <Autocomplete
+                                apiKey={apiKey}
+                                {...props}
+                                onPlaceSelected={(selected) => console.log(selected)}
+                                options={{
+                                    types: ['airport'], // Filter results by airports
+                                    fields: ['formatted_address', 'geometry', 'name'],
+                                }}
+                            />
+                        )}
+                    />
+
+                </div>
+
             </div>
             <div className="relative">
               <Calendar className="absolute left-3 top-3 text-gray-400" size={20} />
