@@ -1,11 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plane, Calendar, DollarSign, Users, ArrowRight, Search, Filter, Clock, Loader, ArrowUpRight, Sparkles } from 'lucide-react';
-import DatePicker from 'react-datepicker';
+import { Plane, Calendar, DollarSign, Users, Search, Filter, Clock, Loader, ArrowUpRight, AlertCircle } from 'lucide-react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { searchFlights } from '../../services/searchApi';
-import "react-datepicker/dist/react-datepicker.css";
-import Autocomplete from "react-google-autocomplete";
-
+import { format } from 'date-fns';
 
 interface Flight {
   id: string;
@@ -52,21 +50,11 @@ interface Flight {
 }
 
 const FlightResults: React.FC = () => {
-  const [isSearching, setIsSearching] = useState(false);
-  const [searchProgress, setSearchProgress] = useState(0);
+  const location = useLocation();
+  const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(true);
   const [flights, setFlights] = useState<Flight[]>([]);
-  const [searchParams, setSearchParams] = useState({
-    originLocationCode: '',
-    destinationLocationCode: '',
-    departureDate: null as Date | null,
-    returnDate: null as Date | null,
-    adults: 1,
-    travelClass: 'ECONOMY',
-    nonStop: false,
-    currencyCode: 'USD',
-    max: 50
-  });
-
+  const [error, setError] = useState<string | null>(null);
   const [filters, setFilters] = useState({
     maxPrice: 2000,
     stops: [] as string[],
@@ -74,51 +62,69 @@ const FlightResults: React.FC = () => {
     cabinClass: 'all'
   });
 
-  const performSearch = async () => {
-    if (!searchParams.originLocationCode || !searchParams.destinationLocationCode || !searchParams.departureDate) {
+  useEffect(() => {
+    const searchParams = new URLSearchParams(location.search);
+
+    const departDate = searchParams.get('departDate');
+    const returnDate = searchParams.get('returnDate');
+
+    const formatDateString = (dateStr: string | null): string | undefined => {
+      if (!dateStr) return undefined;
+      try {
+        const date = new Date(dateStr);
+        return format(date, 'yyyy-MM-dd');
+      } catch (err) {
+        console.error('Date parsing error:', err);
+        return undefined;
+      }
+    };
+
+    const from = searchParams.get('from');
+    const to = searchParams.get('to');
+
+    if (!from || !to || !departDate) {
+      setError('Please provide origin, destination, and departure date');
+      setIsLoading(false);
       return;
     }
 
-    setIsSearching(true);
-    setSearchProgress(0);
-    setFlights([]);
+    const params = {
+      originLocationCode: from.trim().toUpperCase(),
+      destinationLocationCode: to.trim().toUpperCase(),
+      departureDate: formatDateString(departDate) || '',
+      returnDate: formatDateString(returnDate),
+      adults: parseInt(searchParams.get('passengers') || '1', 10),
+      travelClass: searchParams.get('class')?.toUpperCase() || 'ECONOMY',
+      nonStop: false,
+      currencyCode: 'USD',
+      max: 50
+    };
 
-    try {
-      // Simulate progress while searching
-      const progressInterval = setInterval(() => {
-        setSearchProgress(prev => Math.min(prev + 10, 90));
-      }, 500);
+    const fetchFlights = async () => {
+      try {
+        setIsLoading(true);
+        setError(null);
 
-      const results = await searchFlights({
-        ...searchParams,
-        departureDate: searchParams.departureDate.toISOString().split('T')[0],
-        returnDate: searchParams.returnDate?.toISOString().split('T')[0],
-      });
+        if (!/^[A-Z]{3}$/.test(params.originLocationCode) || !/^[A-Z]{3}$/.test(params.destinationLocationCode)) {
+          throw new Error('Invalid airport codes. Please select airports from the suggestions.');
+        }
 
-      clearInterval(progressInterval);
-      setSearchProgress(100);
-      setFlights(results);
-    } catch (error) {
-      console.error('Error searching flights:', error);
-    } finally {
-      setIsSearching(false);
-    }
-  };
+        if (!params.departureDate) {
+          throw new Error('Invalid departure date format. Please select a valid date.');
+        }
 
-  const filterFlights = (flights: Flight[]) => {
-    return flights.filter(flight => {
-      const price = parseFloat(flight.price.total);
-      const matchesPrice = price <= filters.maxPrice;
+        const results = await searchFlights(params);
+        setFlights(Array.isArray(results) ? results : []);
+      } catch (err: any) {
+        console.error('Error fetching flights:', err);
+        setError(err.message || 'Failed to fetch flights. Please try again.');
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-      const stops = flight.itineraries[0].segments.length - 1;
-      const matchesStops = filters.stops.length === 0 || filters.stops.includes(stops.toString());
-
-      const cabinClass = flight.travelerPricings[0].fareDetailsBySegment[0].cabin;
-      const matchesCabin = filters.cabinClass === 'all' || filters.cabinClass === cabinClass;
-
-      return matchesPrice && matchesStops && matchesCabin;
-    });
-  };
+    fetchFlights();
+  }, [location.search]);
 
   const formatDuration = (duration: string) => {
     return duration
@@ -134,6 +140,21 @@ const FlightResults: React.FC = () => {
       hour: '2-digit',
       minute: '2-digit',
       hour12: true
+    });
+  };
+
+  const filterFlights = (flights: Flight[]) => {
+    return flights.filter(flight => {
+      const price = parseFloat(flight.price.total);
+      const matchesPrice = price <= filters.maxPrice;
+
+      const stops = flight.itineraries[0].segments.length - 1;
+      const matchesStops = filters.stops.length === 0 || filters.stops.includes(stops.toString());
+
+      const cabinClass = flight.travelerPricings[0].fareDetailsBySegment[0].cabin;
+      const matchesCabin = filters.cabinClass === 'all' || filters.cabinClass === cabinClass;
+
+      return matchesPrice && matchesStops && matchesCabin;
     });
   };
 
@@ -160,8 +181,38 @@ const FlightResults: React.FC = () => {
     }
   };
 
+  if (isLoading) {
+    return (
+        <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 py-12 flex items-center justify-center">
+          <div className="text-center">
+            <Loader className="w-12 h-12 animate-spin text-blue-500 mx-auto mb-4" />
+            <p className="text-gray-600">Searching for the best flights...</p>
+          </div>
+        </div>
+    );
+  }
+
+  if (error) {
+    return (
+        <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 py-12 px-4">
+          <div className="max-w-2xl mx-auto">
+            <div className="bg-white rounded-xl shadow-lg p-6 text-center">
+              <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
+              <h2 className="text-xl font-semibold text-gray-800 mb-2">Search Error</h2>
+              <p className="text-gray-600 mb-6">{error}</p>
+              <button
+                  onClick={() => navigate('/')}
+                  className="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition-colors"
+              >
+                Return to Search
+              </button>
+            </div>
+          </div>
+        </div>
+    );
+  }
+
   const filteredFlights = filterFlights(flights);
-  const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
 
   return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 py-12 px-4">
@@ -171,194 +222,184 @@ const FlightResults: React.FC = () => {
               animate={{ opacity: 1, y: 0 }}
               className="bg-white rounded-2xl shadow-xl overflow-hidden mb-8"
           >
-            <div className="p-8 bg-gradient-to-r from-blue-600 to-purple-600 text-white">
-              <h1 className="text-3xl font-bold mb-6">Find Your Perfect Flight</h1>
+            <div className="p-6 bg-gradient-to-r from-blue-600 to-purple-600 text-white">
+              <h1 className="text-2xl font-bold mb-2">Flight Search Results</h1>
+              <p className="text-blue-100">Found {filteredFlights.length} flights matching your criteria</p>
+            </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <Autocomplete
-                    apiKey={apiKey}
-                    style={{ width: "90%" }}
-                    onPlaceSelected={(place) => {
-                      console.log(place);
-                    }}
-                    options={{
-                      types: ["(regions)"],
-                      componentRestrictions: { country: "ru" },
-                    }}
-                    defaultValue="Amsterdam"
-                />;
-                <Autocomplete
-                    apiKey={apiKey}
-                    style={{ width: "90%" }}
-                    onPlaceSelected={(place) => {
-                      console.log(place);
-                    }}
-                    options={{
-                      types: ["(regions)"],
-                      componentRestrictions: { country: "ru" },
-                    }}
-                    defaultValue="Amsterdam"
-                />;
-                <div className="relative">
-                  <Calendar className="absolute left-3 top-3 text-gray-400" size={20} />
-                  <DatePicker
-                      selected={searchParams.departureDate}
-                      onChange={(date) => setSearchParams({
-                        ...searchParams,
-                        departureDate: date
-                      })}
-                      placeholderText="Departure Date"
-                      className="w-full pl-10 pr-4 py-2 rounded-lg bg-white/10 text-white placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-white/50"
+            <div className="p-6 border-b">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Max Price (USD)
+                  </label>
+                  <input
+                      type="range"
+                      min="0"
+                      max="5000"
+                      value={filters.maxPrice}
+                      onChange={(e) => setFilters({ ...filters, maxPrice: parseInt(e.target.value) })}
+                      className="w-full"
                   />
+                  <div className="flex justify-between text-sm text-gray-600">
+                    <span>$0</span>
+                    <span>${filters.maxPrice}</span>
+                  </div>
                 </div>
-                <div className="relative">
-                  <Users className="absolute left-3 top-3 text-gray-400" size={20} />
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Stops
+                  </label>
+                  <div className="space-y-2">
+                    <label className="flex items-center">
+                      <input
+                          type="checkbox"
+                          checked={filters.stops.includes('0')}
+                          onChange={(e) => {
+                            const newStops = e.target.checked
+                                ? [...filters.stops, '0']
+                                : filters.stops.filter(s => s !== '0');
+                            setFilters({ ...filters, stops: newStops });
+                          }}
+                          className="rounded text-blue-600"
+                      />
+                      <span className="ml-2">Non-stop</span>
+                    </label>
+                    <label className="flex items-center">
+                      <input
+                          type="checkbox"
+                          checked={filters.stops.includes('1')}
+                          onChange={(e) => {
+                            const newStops = e.target.checked
+                                ? [...filters.stops, '1']
+                                : filters.stops.filter(s => s !== '1');
+                            setFilters({ ...filters, stops: newStops });
+                          }}
+                          className="rounded text-blue-600"
+                      />
+                      <span className="ml-2">1 Stop</span>
+                    </label>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Cabin Class
+                  </label>
                   <select
-                      value={searchParams.travelClass}
-                      onChange={(e) => setSearchParams({
-                        ...searchParams,
-                        travelClass: e.target.value
-                      })}
-                      className="w-full pl-10 pr-4 py-2 rounded-lg bg-white/10 text-white placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-white/50"
+                      value={filters.cabinClass}
+                      onChange={(e) => setFilters({ ...filters, cabinClass: e.target.value })}
+                      className="w-full p-2 border rounded-lg"
                   >
+                    <option value="all">All Classes</option>
                     <option value="ECONOMY">Economy</option>
                     <option value="PREMIUM_ECONOMY">Premium Economy</option>
                     <option value="BUSINESS">Business</option>
-                    <option value="FIRST">First Class</option>
+                    <option value="FIRST">First</option>
                   </select>
                 </div>
               </div>
-
-              <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={performSearch}
-                  className="mt-6 bg-white text-blue-600 px-8 py-3 rounded-lg flex items-center gap-2 hover:shadow-lg transition-shadow"
-              >
-                <Search size={20} />
-                Search Flights
-              </motion.button>
             </div>
-
-            {isSearching && (
-                <div className="p-8">
-                  <div className="max-w-2xl mx-auto">
-                    <div className="mb-6">
-                      <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
-                        <motion.div
-                            initial={{ width: 0 }}
-                            animate={{ width: `${searchProgress}%` }}
-                            className="h-full bg-gradient-to-r from-blue-500 to-purple-500 rounded-full"
-                        />
-                      </div>
-                      <div className="mt-4 text-center text-gray-600">
-                        Searching for the best flights...
-                      </div>
-                    </div>
-                  </div>
-                </div>
-            )}
           </motion.div>
 
           <AnimatePresence>
-            {!isSearching && filteredFlights.length > 0 && (
-                <motion.div
-                    variants={containerVariants}
-                    initial="hidden"
-                    animate="visible"
-                    className="space-y-6"
-                >
-                  {filteredFlights.map((flight) => (
-                      <motion.div
-                          key={flight.id}
-                          variants={itemVariants}
-                          className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow p-6"
-                      >
-                        {flight.itineraries.map((itinerary, index) => (
-                            <div key={index} className="mb-4">
-                              <div className="grid grid-cols-1 md:grid-cols-4 gap-6 items-center">
+            <motion.div
+                variants={containerVariants}
+                initial="hidden"
+                animate="visible"
+                className="space-y-6"
+            >
+              {filteredFlights.map((flight) => (
+                  <motion.div
+                      key={flight.id}
+                      variants={itemVariants}
+                      className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow p-6"
+                  >
+                    {flight.itineraries.map((itinerary, index) => (
+                        <div key={index} className="mb-4">
+                          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 items-center">
+                            <div>
+                              <div className="flex items-center gap-3 mb-2">
+                                <Plane className="text-blue-600" size={24} />
                                 <div>
-                                  <div className="flex items-center gap-3 mb-2">
-                                    <Plane className="text-blue-600" size={24} />
-                                    <div>
-                                      <h3 className="font-semibold">
-                                        {itinerary.segments[0].carrierCode} {itinerary.segments[0].number}
-                                      </h3>
-                                      <p className="text-sm text-gray-500">
-                                        {itinerary.segments[0].aircraft.code}
-                                      </p>
-                                    </div>
-                                  </div>
-                                </div>
-
-                                <div className="text-center">
-                                  <p className="text-2xl font-semibold">
-                                    {formatDateTime(itinerary.segments[0].departure.at)}
-                                  </p>
-                                  <p className="text-gray-500">
-                                    {itinerary.segments[0].departure.iataCode}
-                                  </p>
-                                </div>
-
-                                <div className="text-center">
-                                  <div className="flex flex-col items-center">
-                                    <p className="text-sm text-gray-500">
-                                      {formatDuration(itinerary.duration)}
-                                    </p>
-                                    <div className="w-32 h-px bg-gray-300 my-2 relative">
-                                      <div className="absolute -top-1 right-0 w-2 h-2 bg-blue-600 rounded-full" />
-                                      <Plane size={16} className="absolute -top-2 left-0 text-blue-600 transform -rotate-45" />
-                                    </div>
-                                    <p className="text-sm text-gray-500">
-                                      {itinerary.segments.length - 1 === 0 ? 'Non-stop' : `${itinerary.segments.length - 1} stop${itinerary.segments.length - 1 > 1 ? 's' : ''}`}
-                                    </p>
-                                  </div>
-                                </div>
-
-                                <div className="text-center">
-                                  <p className="text-2xl font-semibold">
-                                    {formatDateTime(itinerary.segments[itinerary.segments.length - 1].arrival.at)}
-                                  </p>
-                                  <p className="text-gray-500">
-                                    {itinerary.segments[itinerary.segments.length - 1].arrival.iataCode}
+                                  <h3 className="font-semibold">
+                                    {itinerary.segments[0].carrierCode} {itinerary.segments[0].number}
+                                  </h3>
+                                  <p className="text-sm text-gray-500">
+                                    {itinerary.segments[0].aircraft.code}
                                   </p>
                                 </div>
                               </div>
                             </div>
-                        ))}
 
-                        <div className="mt-6 pt-6 border-t flex items-center justify-between">
-                          <div className="flex gap-4">
-                            <div className="flex items-center gap-2">
-                              <DollarSign className="text-green-600" size={20} />
-                              <span className="text-2xl font-bold">
-                          {parseFloat(flight.price.total).toFixed(2)} {flight.price.currency}
-                        </span>
+                            <div className="text-center">
+                              <p className="text-2xl font-semibold">
+                                {formatDateTime(itinerary.segments[0].departure.at)}
+                              </p>
+                              <p className="text-gray-500">
+                                {itinerary.segments[0].departure.iataCode}
+                              </p>
                             </div>
-                            <div className="flex items-center gap-2">
-                              <Users className="text-gray-400" size={20} />
-                              <span className="text-gray-600">
-                          {flight.numberOfBookableSeats} seats left
-                        </span>
+
+                            <div className="text-center">
+                              <div className="flex flex-col items-center">
+                                <p className="text-sm text-gray-500">
+                                  {formatDuration(itinerary.duration)}
+                                </p>
+                                <div className="w-32 h-px bg-gray-300 my-2 relative">
+                                  <div className="absolute -top-1 right-0 w-2 h-2 bg-blue-600 rounded-full" />
+                                  <Plane size={16} className="absolute -top-2 left-0 text-blue-600 transform -rotate-45" />
+                                </div>
+                                <p className="text-sm text-gray-500">
+                                  {itinerary.segments.length - 1 === 0 ? 'Non-stop' : `${itinerary.segments.length - 1} stop${itinerary.segments.length - 1 > 1 ? 's' : ''}`}
+                                </p>
+                              </div>
+                            </div>
+
+                            <div className="text-center">
+                              <p className="text-2xl font-semibold">
+                                {formatDateTime(itinerary.segments[itinerary.segments.length - 1].arrival.at)}
+                              </p>
+                              <p className="text-gray-500">
+                                {itinerary.segments[itinerary.segments.length - 1].arrival.iataCode}
+                              </p>
                             </div>
                           </div>
-
-                          <motion.button
-                              whileHover={{ scale: 1.05 }}
-                              whileTap={{ scale: 0.95 }}
-                              className="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-6 py-2 rounded-lg flex items-center gap-2"
-                          >
-                            Select Flight
-                            <ArrowUpRight size={18} />
-                          </motion.button>
                         </div>
-                      </motion.div>
-                  ))}
-                </motion.div>
-            )}
+                    ))}
+
+                    <div className="mt-6 pt-6 border-t flex items-center justify-between">
+                      <div className="flex gap-4">
+                        <div className="flex items-center gap-2">
+                          <DollarSign className="text-green-600" size={20} />
+                          <span className="text-2xl font-bold">
+                        {parseFloat(flight.price.total).toFixed(2)} {flight.price.currency}
+                      </span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Users className="text-gray-400" size={20} />
+                          <span className="text-gray-600">
+                        {flight.numberOfBookableSeats} seats left
+                      </span>
+                        </div>
+                      </div>
+
+                      <motion.button
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                          className="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-6 py-2 rounded-lg flex items-center gap-2"
+                      >
+                        Select Flight
+                        <ArrowUpRight size={18} />
+                      </motion.button>
+                    </div>
+                  </motion.div>
+              ))}
+            </motion.div>
           </AnimatePresence>
 
-          {!isSearching && filteredFlights.length === 0 && searchParams.departureDate && (
+          {filteredFlights.length === 0 && (
               <div className="text-center py-12 bg-white rounded-xl shadow-lg">
                 <Plane className="mx-auto mb-4 text-gray-400" size={48} />
                 <p className="text-xl font-semibold text-gray-600">No flights found</p>
