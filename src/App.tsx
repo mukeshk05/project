@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { Routes, Route, Link, useNavigate } from 'react-router-dom';
-import { Plane, MapPin, Calendar, Users, Search, Star, ArrowRight, Phone, Mail, Clock, Filter, LogIn, UserPlus, LogOut, MessageSquare, History } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Plane, MapPin, Calendar, Users, Search, Star, ArrowRight, Phone, Mail, Clock, Filter, LogIn, UserPlus, LogOut, MessageSquare, History } from 'lucide-react';
 import { useInView } from 'react-intersection-observer';
 import { useAuth } from './context/AuthContext';
 import LoginForm from './components/LoginForm';
