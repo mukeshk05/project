@@ -1,24 +1,10 @@
 import express from 'express';
 import { authenticateToken } from '../middleware/auth.js';
 import Amadeus from 'amadeus';
+import { HotelRating } from '../../src/services/searchApi.js';
 
 const router = express.Router();
 
-export interface HotelRating {
-    overallRating: number;
-    sentimentScore: number;
-    categories: {
-        name: string;
-        rating: number;
-        reviews: number;
-    }[];
-    reviews: {
-        text: string;
-        rating: number;
-        date: string;
-        sentiment: 'positive' | 'neutral' | 'negative';
-    }[];
-}
 
 const mockHotels = [
     {
@@ -494,7 +480,7 @@ router.post('/hotelsOfferByHotelId', authenticateToken, async (req, res) => {
              hotelIds: hotelId,
              adults: '2'
          })
-
+         
          if(!response.data) {
              console.log("no data found Hotel ID"+hotelId);
          }
@@ -565,7 +551,6 @@ router.get('/hotels/:offerId', authenticateToken, async (req, res) => {
     }
 });
 
-
 // Hotel ratings endpoint
 router.get('/hotels/:hotelId/ratings', authenticateToken, async (req, res) => {
     try {
@@ -583,7 +568,7 @@ router.get('/hotels/:hotelId/ratings', authenticateToken, async (req, res) => {
         }
 
         const hotelData = response.data[0];
-
+        
         // Transform Amadeus response to match our HotelRating interface
         const rating: HotelRating = {
             overallRating: parseFloat(hotelData.overallScore) || 4.5,
@@ -664,6 +649,5 @@ router.get('/hotels/:hotelId/ratings', authenticateToken, async (req, res) => {
         res.json(mockRating);
     }
 });
-
 
 export default router;

@@ -16,6 +16,7 @@ import adminRoutes from './routes/admin.js';
 import travelRoutes from './routes/travel.js';
 import activityRoutes from './routes/activities.js';
 import searchRoutes from './routes/search.js';
+import userActivityRoutes from './routes/userActivity.js';
 import User from './models/User.js';
 import './config/passport.js';
 
@@ -47,6 +48,7 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/travel', travelRoutes);
 app.use('/api/activities', activityRoutes);
 app.use('/api/search', searchRoutes);
+app.use('/api/user-activity', userActivityRoutes);
 
 // Health check endpoint
 app.get('/health', (req, res) => {
