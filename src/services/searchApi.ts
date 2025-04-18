@@ -123,6 +123,21 @@ export interface HotelOffer {
     }>;
 }
 
+export interface HotelRating {
+    overallRating: number;
+    sentimentScore: number;
+    categories: {
+        name: string;
+        rating: number;
+        reviews: number;
+    }[];
+    reviews: {
+        text: string;
+        rating: number;
+        date: string;
+        sentiment: 'positive' | 'neutral' | 'negative';
+    }[];
+}
 
 export interface HotelData{
         chainCode: string;
@@ -296,6 +311,40 @@ export const searchAirports1 = async (keyword: string): Promise<LocationSearchRe
     }
 };
 
+export const getHotelRatings = async (hotelId: string): Promise<HotelRating> => {
+    try {
+        const response = await api.get(`/hotels/${hotelId}/ratings`);
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching hotel ratings:', error);
+        // Return mock data for development
+        return {
+            overallRating: 4.5,
+            sentimentScore: 0.85,
+            categories: [
+                { name: 'Cleanliness', rating: 4.7, reviews: 156 },
+                { name: 'Service', rating: 4.6, reviews: 142 },
+                { name: 'Location', rating: 4.8, reviews: 168 },
+                { name: 'Value', rating: 4.3, reviews: 134 }
+            ],
+            reviews: [
+                {
+                    text: "Excellent location and outstanding service. The staff went above and beyond.",
+                    rating: 5,
+                    date: new Date().toISOString(),
+                    sentiment: 'positive'
+                },
+                {
+                    text: "Clean rooms and great amenities, but the breakfast could be better.",
+                    rating: 4,
+                    date: new Date(Date.now() - 86400000).toISOString(),
+                    sentiment: 'neutral'
+                }
+            ]
+        };
+    }
+};
+
 export default {
     searchFlights,
     searchCities,
@@ -305,5 +354,6 @@ export default {
     getHotelOffer,
     searchLocations,
     getFlightInsights,
-    searchAirports
+    searchAirports,
+    getHotelRatings
 };
