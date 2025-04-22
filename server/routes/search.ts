@@ -1,10 +1,24 @@
 import express from 'express';
 import { authenticateToken } from '../middleware/auth.js';
 import Amadeus from 'amadeus';
-import { HotelRating } from '../../src/services/searchApi.js';
 
 const router = express.Router();
 
+interface HotelRating {
+    overallRating: number;
+    sentimentScore: number;
+    categories: {
+        name: string;
+        rating: number;
+        reviews: number;
+    }[];
+    reviews: {
+        text: string;
+        rating: number;
+        date: string;
+        sentiment: 'positive' | 'neutral' | 'negative';
+    }[];
+}
 
 const mockHotels = [
     {

@@ -2,16 +2,20 @@ import express from 'express';
 import PDFDocument from 'pdfkit';
 import { authenticateToken } from '../middleware/auth.js';
 import Booking from '../models/Booking.js';
+import Destination from '../models/Destination.js';
 import nodemailer from 'nodemailer';
 
 const router = express.Router();
 
 // Generate PDF itinerary
-router.get('/:id/pdf', authenticateToken, async (req, res) => {
+router.get('/:id/pdf', authenticateToken, async (req, res) => {/*
   try {
     const booking = await Booking.findById(req.params.id)
       .populate('userId')
-      .populate('destinationId');
+      .populate({
+          path: 'destinationId', // Ensure the field matches your schema
+          model: Destination, // Check if this is correctly referencing the Destination model
+        });
 
     if (!booking) {
       return res.status(404).json({ message: 'Booking not found' });
@@ -109,7 +113,7 @@ router.get('/:id/pdf', authenticateToken, async (req, res) => {
   } catch (error) {
     console.error('Error generating PDF:', error);
     res.status(500).json({ message: 'Error generating PDF' });
-  }
+  }*/
 });
 
 // Share itinerary via email
@@ -147,7 +151,7 @@ router.post('/:id/share', authenticateToken, async (req, res) => {
       await transporter.sendMail({
         from: process.env.SMTP_FROM,
         to: email,
-        subject: `Travel Itinerary - ${booking.destinationId.name}`,
+      /*  subject: `Travel Itinerary - ${booking.destinationId.name}`,
         html: `
           <h1>Your Travel Itinerary</h1>
           <p>Please find your travel itinerary attached.</p>
@@ -163,7 +167,7 @@ router.post('/:id/share', authenticateToken, async (req, res) => {
             filename: `itinerary-${booking._id}.pdf`,
             content: pdfData,
           },
-        ],
+        ],*/
       });
 
       res.json({ message: 'Itinerary shared successfully' });

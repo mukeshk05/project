@@ -5,7 +5,20 @@ import Conversation from '../models/Conversation.js';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import Amadeus from 'amadeus';
-import { format, addDays, addWeeks, addMonths, nextDay, parse, isValid, startOfWeek, endOfWeek, isFuture, subDays } from 'date-fns';
+import {
+  format,
+  addDays,
+  addWeeks,
+  addMonths,
+  nextDay,
+  parse,
+  isValid,
+  startOfWeek,
+  endOfWeek,
+  isFuture,
+  subDays,
+  Day
+} from 'date-fns';
 
 dotenv.config();
 
@@ -297,7 +310,33 @@ router.post('/', async (req: Request, res: Response) => {
 
     const completion = await openai.chat.completions.create({
       messages: [
-        systemMessage,
+        {
+          role: "system",
+          content: `You are an expert travel assistant with deep knowledge of global destinations, cultures, and travel planning.
+        ${hotelResults ? `\n\nI have found the following hotel options:\n${JSON.stringify(hotelResults, null, 2)}` : ''}
+        
+        Focus on providing:
+        - Personalized travel recommendations based on preferences
+        - Hotel suggestions and comparisons
+        - Local area insights and attractions
+        - Budget-friendly tips and alternatives
+        - Transportation options and advice
+        - Activity recommendations
+        - Safety tips and cultural considerations
+        
+        If hotel data is available:
+        - Analyze and compare hotel options
+        - Highlight best value properties
+        - Consider location, amenities, and price
+        - Suggest optimal room types
+        - Note cancellation policies
+        - If budget was specified, analyze if options are within budget
+        - Suggest alternative dates if cheaper options available
+        
+        Keep responses friendly, concise, and actionable.
+        When discussing hotels, be specific about prices, amenities, and locations.
+        Format currency with appropriate symbols (e.g., $, €, £).`
+        },
         {
           role: "user",
           content: message
@@ -307,6 +346,7 @@ router.post('/', async (req: Request, res: Response) => {
       temperature: 0.7,
       max_tokens: 500,
     });
+
 
     const aiResponse = completion.choices[0].message.content;
 
@@ -324,6 +364,151 @@ router.post('/', async (req: Request, res: Response) => {
     res.status(500).json({ message: 'Error processing your request' });
   }
 });
+
+const parseDateExpression = (expression: string): { start: Date; end?: Date } | null => {
+  // Try to parse as a specific date first
+  try {
+    const specificDate = parse(expression, 'yyyy-MM-dd', new Date());
+    if (isValid(specificDate) && isFuture(specificDate)) {
+      return { start: specificDate };
+    }
+  } catch (error) {
+    // Not a specific date, continue with relative date parsing
+  }
+
+  const today = new Date();
+  const lowerExpression = expression.toLowerCase();
+
+  // Handle "next weekend"
+  if (lowerExpression.includes('next weekend')) {
+    const nextSaturday = nextDay(today, 6); // 6 is Saturday
+    return {
+      start: nextSaturday,
+      end: addDays(nextSaturday, 2) // Weekend is Saturday to Monday
+    };
+  }
+
+  // Handle "this weekend"
+  if (lowerExpression.includes('this weekend')) {
+    const thisSaturday = nextDay(today, 6);
+    if (today.getDay() >= 6) { // If today is already Saturday or Sunday
+      return {
+        start: today,
+        end: addDays(startOfWeek(today, { weekStartsOn: 6 }), 2)
+      };
+    }
+    return {
+      start: thisSaturday,
+      end: addDays(thisSaturday, 2)
+    };
+  }
+
+  // Handle "next week"
+  if (lowerExpression.includes('next week')) {
+    const nextWeekStart = addWeeks(startOfWeek(today), 1);
+    return {
+      start: nextWeekStart,
+      end: endOfWeek(nextWeekStart)
+    };
+  }
+
+  // Handle "next month"
+  if (lowerExpression.includes('next month')) {
+    const nextMonthStart = addMonths(today, 1);
+    return {
+      start: nextMonthStart,
+      end: addDays(addMonths(nextMonthStart, 1), -1)
+    };
+  }
+
+  // Handle "tomorrow"
+  if (lowerExpression.includes('tomorrow')) {
+    const tomorrow = addDays(today, 1);
+    return { start: tomorrow };
+  }
+
+  // Handle "next [day of week]"
+  const daysOfWeek = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+  for (let i = 0; i < daysOfWeek.length; i++) {
+    if (lowerExpression.includes(`next ${daysOfWeek[i]}`)) {
+      return { start: nextDay(today, i as Day) };
+    }
+  }
+
+  // Handle "in X days/weeks/months"
+  const inDaysMatch = lowerExpression.match(/in (\d+) days?/);
+  if (inDaysMatch) {
+    return { start: addDays(today, parseInt(inDaysMatch[1])) };
+  }
+
+  const inWeeksMatch = lowerExpression.match(/in (\d+) weeks?/);
+  if (inWeeksMatch) {
+    return { start: addWeeks(today, parseInt(inWeeksMatch[1])) };
+  }
+
+  const inMonthsMatch = lowerExpression.match(/in (\d+) months?/);
+  if (inMonthsMatch) {
+    return { start: addMonths(today, parseInt(inMonthsMatch[1])) };
+  }
+
+  return null;
+};
+
+const parseBudget = (message: string): { amount: number; currency: string } | null => {
+  // Match patterns like "$500", "500 USD", "€300", "300 euros", etc.
+  const currencySymbols = {
+    '$': 'USD',
+    '€': 'EUR',
+    '£': 'GBP',
+    '¥': 'JPY',
+    '₹': 'INR',
+    'USD': 'USD',
+    'EUR': 'EUR',
+    'GBP': 'GBP',
+    'JPY': 'JPY',
+    'INR': 'INR',
+    'dollars': 'USD',
+    'euros': 'EUR',
+    'pounds': 'GBP',
+    'yen': 'JPY',
+    'rupees': 'INR'
+  };
+
+  // Match currency symbol/code followed by amount
+  const symbolFirstRegex = /([€$£¥₹])(\d+)/g;
+  const symbolFirstMatch = [...message.matchAll(symbolFirstRegex)];
+  if (symbolFirstMatch.length > 0) {
+    const [_, symbol, amount] = symbolFirstMatch[0];
+    return {
+      amount: parseInt(amount),
+      currency: currencySymbols[symbol as keyof typeof currencySymbols] || 'USD'
+    };
+  }
+
+  // Match amount followed by currency code/name
+  const amountFirstRegex = /(\d+)\s*(USD|EUR|GBP|JPY|INR|dollars|euros|pounds|yen|rupees)/gi;
+  const amountFirstMatch = [...message.matchAll(amountFirstRegex)];
+  if (amountFirstMatch.length > 0) {
+    const [_, amount, currency] = amountFirstMatch[0];
+    return {
+      amount: parseInt(amount),
+      currency: currencySymbols[currency.toUpperCase() as keyof typeof currencySymbols] || 'USD'
+    };
+  }
+
+  // Match just a number with "budget" nearby
+  const budgetRegex = /budget.*?(\d+)|(\d+).*?budget/gi;
+  const budgetMatch = [...message.matchAll(budgetRegex)];
+  if (budgetMatch.length > 0) {
+    const amount = budgetMatch[0][1] || budgetMatch[0][2];
+    return {
+      amount: parseInt(amount),
+      currency: 'USD' // Default currency
+    };
+  }
+
+  return null;
+};
 
 router.get('/history', async (req: Request, res: Response) => {
   try {

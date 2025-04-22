@@ -232,10 +232,9 @@ router.post('/generate', authenticateToken, async (req, res) => {
       max_tokens: 1500,
     });
 
-    const generatedContent = response.choices[0].message.content;
-    
-    // Extract title from the generated content
-    const titleMatch = generatedContent.match(/<h1>(.*?)<\/h1>/) || generatedContent.match(/# (.*?)(\n|$)/);
+    let generatedContent = response.choices[0].message.content;
+    let titleMatch= generatedContent.match(/<h1>(.*?)<\/h1>/) || generatedContent.match(/# (.*?)(\n|$)/);
+
     const title = titleMatch ? titleMatch[1] : 'Generated Travel Article';
     
     // Extract excerpt

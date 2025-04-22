@@ -2,6 +2,7 @@ import express from 'express';
 import { authenticateToken } from '../middleware/auth.js';
 import UserActivity from '../models/UserActivity.js';
 import OpenAI from 'openai';
+import mongoose from "mongoose";
 
 const router = express.Router();
 const openai = new OpenAI({
@@ -12,7 +13,7 @@ const openai = new OpenAI({
 router.post('/', authenticateToken, async (req, res) => {
   try {
     const activity = new UserActivity({
-      userId: req.user.userId,
+      userId: req.user,
       ...req.body,
     });
     await activity.save();
@@ -123,7 +124,7 @@ router.get('/recommendations/:userId', authenticateToken, async (req, res) => {
       max_tokens: 1000,
     });
 
-    const recommendations = JSON.parse(response.choices[0].message.content);
+    const recommendations = JSON.parse(<string>response.choices[0].message.content);
     res.json(recommendations);
   } catch (error) {
     console.error('Error getting recommendations:', error);

@@ -19,6 +19,8 @@ import searchRoutes from './routes/search.js';
 import userActivityRoutes from './routes/userActivity.js';
 import User from './models/User.js';
 import './config/passport.js';
+import geoSuggestions from "./routes/geoSuggestions.js";
+
 
 dotenv.config();
 
@@ -49,6 +51,7 @@ app.use('/api/travel', travelRoutes);
 app.use('/api/activities', activityRoutes);
 app.use('/api/search', searchRoutes);
 app.use('/api/user-activity', userActivityRoutes);
+app.use('/api/suggestions', geoSuggestions);
 
 // Health check endpoint
 app.get('/health', (req, res) => {

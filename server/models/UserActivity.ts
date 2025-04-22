@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 
+
 const userActivitySchema = new mongoose.Schema({
   userId: {
     type: mongoose.Schema.Types.ObjectId,
