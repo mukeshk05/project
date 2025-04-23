@@ -4,7 +4,7 @@ import {
   Package, Sun, Cloud, Umbrella, ThermometerSun, Wind,
   Calendar, MapPin, Users, Briefcase, Check, X, Plus,
   Save, Trash2, Edit, Download, Share2, Sparkles, Loader,
-  Shirt, Shoe, Smartphone, Battery, FirstAid, Scissors
+  Shirt, Footprints, Smartphone, Battery, BriefcaseIcon, Scissors,
 } from 'lucide-react';
 import { format, addDays } from 'date-fns';
 import { useAuth } from '../context/AuthContext';
@@ -816,9 +816,9 @@ const AiPackingOptimizer: React.FC = () => {
       case 'documents':
         return <FileText size={size} />;
       case 'accessories':
-        return <Shoe size={size} />;
+        return <Footprints size={size} />;
       case 'medical':
-        return <FirstAid size={size} />;
+        return <Briefcase size={size} />;
       default:
         return <Package size={size} />;
     }

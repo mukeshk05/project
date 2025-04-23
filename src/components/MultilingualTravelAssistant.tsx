@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   MessageSquare, Send, Loader, Bot, User as UserIcon, Sparkles,
-  Mic, MicOff, Globe, ArrowRight, Clock, Translate
+  Mic, MicOff, Globe, ArrowRight, Clock, Languages
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useLanguage } from '../context/LanguageContext';
@@ -258,7 +258,7 @@ const MultilingualTravelAssistant: React.FC = () => {
                                 className="flex items-center gap-1 hover:underline"
                                 title="View original text"
                               >
-                                <Translate size={12} />
+                                <Languages size={12} />
                                 <span>Original</span>
                               </button>
                             )}

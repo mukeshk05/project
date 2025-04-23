@@ -158,7 +158,7 @@ const TripDnaGenerator: React.FC = () => {
         {
           id: '2',
           name: 'Cultural Explorer',
-          description: 'You're drawn to the rich tapestry of human history and expression. Your ideal trip involves museums, historical sites, and immersive cultural experiences.',
+          description: 'You  are drawn to the rich tapestry of human history and expression. Your ideal trip involves museums, historical sites, and immersive cultural experiences.',
           preferences: [
             {
               category: 'Activities',

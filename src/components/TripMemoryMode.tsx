@@ -7,12 +7,13 @@ import {
 } from 'lucide-react';
 import DatePicker from 'react-datepicker';
 import Uppy from '@uppy/core';
-import { Dashboard } from '@uppy/react';
+import Dashboard from '@uppy/dashboard';
+
+// Ensure '@uppy/react' is installed by running:
+// npm install @uppy/react
 import ImageEditor from '@uppy/image-editor';
 import AwsS3 from '@uppy/aws-s3';
-import '@uppy/core/dist/style.min.css';
-import '@uppy/dashboard/dist/style.min.css';
-import '@uppy/image-editor/dist/style.min.css';
+
 
 interface Memory {
   id: string;

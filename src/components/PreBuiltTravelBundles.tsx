@@ -155,7 +155,7 @@ const PreBuiltTravelBundles: React.FC = () => {
         {
           id: '3',
           title: 'Bali Luxury Retreat',
-          description: 'Indulge in the ultimate luxury experience in beautiful Bali. Stay in exclusive villas, enjoy private spa treatments, and experience the island's natural beauty and culture with VIP service.',
+          description: 'Indulge in the ultimate luxury experience in beautiful Bali. Stay in exclusive villas, enjoy private spa treatments, and experience the island s natural beauty and culture with VIP service.',
           destination: 'Bali, Indonesia (Ubud, Seminyak, Uluwatu)',
           duration: 8,
           price: 4299,
@@ -199,7 +199,7 @@ const PreBuiltTravelBundles: React.FC = () => {
         {
           id: '4',
           title: 'European Capitals on a Budget',
-          description: 'Experience the magic of Europe's most iconic cities without breaking the bank. This carefully crafted budget package includes comfortable accommodations, essential sightseeing, and plenty of free time.',
+          description: 'Experience the magic of Europe s most iconic cities without breaking the bank. This carefully crafted budget package includes comfortable accommodations, essential sightseeing, and plenty of free time.',
           destination: 'Europe (Paris, Amsterdam, Berlin, Prague)',
           duration: 14,
           price: 1899,
@@ -243,7 +243,7 @@ const PreBuiltTravelBundles: React.FC = () => {
         {
           id: '5',
           title: 'Romantic Maldives Escape',
-          description: 'Celebrate your love in one of the world's most romantic destinations. This all-inclusive package features overwater bungalows, private dinners on the beach, and unforgettable experiences for couples.',
+          description: 'Celebrate your love in one of the worlds most romantic destinations. This all-inclusive package features overwater bungalows, private dinners on the beach, and unforgettable experiences for couples.',
           destination: 'Maldives',
           duration: 7,
           price: 5299,
@@ -450,9 +450,9 @@ const PreBuiltTravelBundles: React.FC = () => {
                     className="p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
                     <option value="all">Any Price</option>
-                    <option value="budget">Budget (< $2000)</option>
+                    <option value="budget">Budget (&lt $2000)</option>
                     <option value="moderate">Moderate ($2000-$4000)</option>
-                    <option value="luxury">Luxury (> $4000)</option>
+                    <option value="luxury">Luxury (&gt $4000)</option>
                   </select>
                 </div>
               </motion.div>

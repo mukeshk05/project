@@ -3,8 +3,18 @@ import { searchFlightDeals, searchHotelDeals } from './affiliateApi';
 import { searchActivities } from './getYourGuideApi';
 import { format } from 'date-fns';
 
-const openai = new OpenAI({
+
+/*const openai = new OpenAI({
   apiKey: import.meta.env.VITE_OPENAI_API_KEY,
+});*/
+
+import axios from 'axios';
+
+const api = axios.create({
+  baseURL: '/api/search',
+  headers: {
+    'Content-Type': 'application/json',
+  },
 });
 
 interface TripPlanRequest {

@@ -113,7 +113,7 @@ const TravelStyleMatcher: React.FC = () => {
         {
           id: '1',
           name: 'Cultural Explorer',
-          description: 'You're drawn to the rich tapestry of human history and expression. Your ideal trip involves museums, historical sites, and immersive cultural experiences.',
+          description: 'You are drawn to the rich tapestry of human history and expression. Your ideal trip involves museums, historical sites, and immersive cultural experiences.',
           matchScore: 92,
           traits: [
             {
@@ -452,7 +452,7 @@ const TravelStyleMatcher: React.FC = () => {
       ]
     },
     {
-      question: 'What's your ideal accommodation?',
+      question: 'What is your ideal accommodation?',
       options: [
         'Boutique hotels with local character',
         'Eco-lodges or camping',
@@ -461,7 +461,7 @@ const TravelStyleMatcher: React.FC = () => {
       ]
     },
     {
-      question: 'What's most important to you when traveling?',
+      question: 'What is most important to you when traveling?',
       options: [
         'Learning about different cultures',
         'Seeking thrilling experiences',

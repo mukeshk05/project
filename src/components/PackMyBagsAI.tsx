@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Suitcase, Sun, Umbrella, ThermometerSun, Calendar, MapPin, Plus, Check, X, Download, Share2 } from 'lucide-react';
+import { Briefcase, Sun, Umbrella, ThermometerSun, Calendar, MapPin, Plus, Check, X, Download, Share2 } from 'lucide-react';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
 
@@ -122,7 +122,7 @@ ${category.items.map(item => `- ${item.name} (${item.quantity})`).join('\n')}
           className="bg-white rounded-2xl shadow-xl p-8"
         >
           <div className="flex items-center gap-3 mb-8">
-            <Suitcase className="text-blue-600" size={32} />
+            <Briefcase className="text-blue-600" size={32} />
             <h1 className="text-2xl font-bold">Pack My Bags AI</h1>
           </div>
 
@@ -209,7 +209,7 @@ ${category.items.map(item => `- ${item.name} (${item.quantity})`).join('\n')}
               </>
             ) : (
               <>
-                <Suitcase size={20} />
+                <Briefcase size={20} />
                 <span>Generate Packing List</span>
               </>
             )}

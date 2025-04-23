@@ -70,7 +70,7 @@ const SocialFeed: React.FC = () => {
           userId: '101',
           userName: 'Sarah Johnson',
           userAvatar: 'https://api.dicebear.com/7.x/adventurer/svg?seed=Sarah',
-          content: 'Just arrived in Santorini! The views are absolutely breathtaking. Can't wait to explore the white-washed buildings and catch the famous sunset. Any recommendations?',
+          content: 'Just arrived in Santorini! The views are absolutely breathtaking. Can t wait to explore the white-washed buildings and catch the famous sunset. Any recommendations?',
           images: [
             'https://images.unsplash.com/photo-1570077188670-e3a8d69ac5ff?auto=format&fit=crop&q=80&w=2000'
           ],
@@ -144,7 +144,7 @@ const SocialFeed: React.FC = () => {
           userId: '106',
           userName: 'Olivia Thompson',
           userAvatar: 'https://api.dicebear.com/7.x/adventurer/svg?seed=Olivia',
-          content: 'Pro tip for Tokyo travelers: get the 72-hour metro pass and a pocket WiFi. Makes navigating the city so much easier! Also, don't miss the teamLab Borderless digital art museum - it's mind-blowing!',
+          content: 'Pro tip for Tokyo travelers: get the 72-hour metro pass and a pocket WiFi. Makes navigating the city so much easier! Also, dont miss the teamLab Borderless digital art museum - its mind-blowing!',
           location: 'Tokyo, Japan',
           destination: 'Tokyo',
           likes: 156,

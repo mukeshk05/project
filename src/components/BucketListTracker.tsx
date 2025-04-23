@@ -124,7 +124,7 @@ const BucketListTracker: React.FC = () => {
           priority: 'medium',
           status: 'completed',
           completedDate: new Date('2023-09-05'),
-          notes: 'The freshest sushi I've ever had! Went to Sushi Dai and waited in line for 3 hours, but it was worth every minute.',
+          notes: 'The freshest sushi Ive ever had! Went to Sushi Dai and waited in line for 3 hours, but it was worth every minute.',
           isPublic: true,
           likes: 18,
           createdAt: new Date('2023-05-10'),
